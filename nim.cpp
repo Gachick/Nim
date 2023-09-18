@@ -41,7 +41,7 @@ private:
     case Player::User:
       std::cout << "Введите ход вида \"строка кол-во\": ";
       std::cin >> mv.row >> mv.amount;
-      --mv.amount;
+      --mv.row;
       break;
     case Player::Bot:
       std::cout << "Ход компьютера: ";
@@ -58,10 +58,11 @@ private:
   } // обработать случай когда значения больше возможных
 
   Move findOptimalMove() {
+    Move mv;
     if (calculateNimSum(state) == 0) {
       for (int j{0}; j < state.size(); ++j) {
         if (state[j] != 0)
-          return Move{j, 1};
+          mv = {j, 1};
       }
     } else {
       for (int j{0}; j < state.size(); ++j) {
@@ -69,9 +70,10 @@ private:
         potentialMove[j] = 0;
         int newValue{calculateNimSum(potentialMove)};
         if (newValue < state[j])
-          return Move{j, state[j] - newValue};
+          mv = {j, state[j] - newValue};
       }
     }
+    return mv;
   }
 
   bool gameEnded() { return std::reduce(state.begin(), state.end()) == 0; }
