@@ -1,33 +1,34 @@
 #include <iostream>
+#include <numeric>
 #include <vector>
 
 enum class Player { User, Bot };
 
 struct Move {
-  int row = 0;
-  int amount = 0;
+  int row{0};
+  int amount{0};
+
+  Move() = default;
+  Move(int row, int amount) : row{row}, amount{amount} {};
 };
+
+int calculateNimSum(std::vector<int> state) {
+  int res{0};
+  for (int i : state) {
+    res ^= i;
+  }
+  return res;
+}
 
 class Nim {
 private:
   std::vector<int> state{3, 4, 5};
-  Player currentPlayer = Player::User;
-
-public:
-  Nim() = default;
-  Nim(Player startingPlayer) : currentPlayer{startingPlayer} {};
-
-  Player play() {
-    while (!gameEnded()) {
-      printState();
-      move(getMove());
-    }
-    return currentPlayer == Player::User ? Player::Bot : Player::User;
-  }
+  Player currentPlayer{Player::User};
+  Player awaitingPlayer{Player::Bot};
 
   void printState() {
     for (int i : state) {
-      for (int j = 0; j < i; j++) {
+      for (int j{0}; j < i; j++) {
         std::cout << '#';
       }
       std::cout << "\n";
@@ -42,9 +43,12 @@ public:
       std::cin >> mv.row >> mv.amount;
       break;
     case Player::Bot:
-      std::cin >> mv.row >> mv.amount;
+      std::cout << "Ход компьютера: ";
+      mv = findOptimalMove();
+      std::cout << mv.row << " " << mv.amount << "\n";
       break;
     }
+    std::swap(currentPlayer, awaitingPlayer);
     return mv;
   }
 
@@ -52,11 +56,48 @@ public:
     state[mv.row - 1] -= mv.amount;
   } // обработать случай когда значения больше возможных
 
-  bool gameEnded() { return state[0] + state[1] + state[2] == 0; }
+  Move findOptimalMove() {
+    if (calculateNimSum(state) == 0) {
+      for (int j{0}; j < state.size(); ++j) {
+        if (state[j] != 0)
+          return Move{j, 1};
+      }
+    } else {
+      for (int j{0}; j < state.size(); ++j) {
+        std::vector<int> potentialMove{state};
+        potentialMove[j] = 0;
+        int newValue{calculateNimSum(potentialMove)};
+        if (newValue < state[j])
+          return Move{j + 1, state[j] - newValue};
+      }
+    }
+  }
+
+  bool gameEnded() { return std::reduce(state.begin(), state.end()) == 0; }
+
+public:
+  Nim() = default;
+  Nim(Player startingPlayer) : currentPlayer{startingPlayer} {};
+
+  Player play() {
+    while (!gameEnded()) {
+      printState();
+      move(getMove());
+    }
+    return awaitingPlayer;
+  }
 };
 
 int main(int argc, char const *argv[]) {
   Nim game{};
-  Player winner = game.play();
+  Player winner{game.play()};
+  switch (winner) {
+  case Player::User:
+    std::cout << "Победил игрок";
+    break;
+  case Player::Bot:
+    std::cout << "Победил компьютер";
+    break;
+  }
   return 0;
 }
