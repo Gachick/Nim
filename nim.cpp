@@ -46,14 +46,14 @@ private:
       if (std::cin.fail())
         throw std::runtime_error{"Недействительные входные данные."};
       --mv.row;
-      if (mv.row >= state.size() || mv.amount > state[mv.row] || mv.row < 1 ||
+      if (mv.row >= state.size() || mv.amount > state[mv.row] || mv.row < 0 ||
           mv.amount < 1)
         throw std::runtime_error{"Неверное значение ряда или количества."};
       break;
     case Player::Bot:
       std::cout << "Ход компьютера: ";
       mv = findOptimalMove();
-      std::cout << mv.row << " " << mv.amount << "\n";
+      std::cout << mv.row + 1 << " " << mv.amount << "\n";
       break;
     }
     std::swap(currentPlayer, awaitingPlayer);
@@ -85,7 +85,8 @@ private:
 
 public:
   Nim() = default;
-  Nim(Player startingPlayer) : currentPlayer{startingPlayer} {};
+  Nim(Player startingPlayer, Player secondPlayer)
+      : currentPlayer{startingPlayer} {};
 
   Player play() {
     while (!gameEnded()) {
