@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <vector>
 
@@ -27,6 +28,7 @@ private:
   Player awaitingPlayer{Player::Bot};
 
   void printState() {
+    std::cout << "\n";
     for (int i : state) {
       for (int j{0}; j < i; j++) {
         std::cout << '#';
@@ -41,7 +43,12 @@ private:
     case Player::User:
       std::cout << "Введите ход вида \"строка кол-во\": ";
       std::cin >> mv.row >> mv.amount;
+      if (std::cin.fail())
+        throw std::runtime_error{"Недействительные входные данные."};
       --mv.row;
+      if (mv.row >= state.size() || mv.amount > state[mv.row] || mv.row < 1 ||
+          mv.amount < 1)
+        throw std::runtime_error{"Неверное значение ряда или количества."};
       break;
     case Player::Bot:
       std::cout << "Ход компьютера: ";
@@ -53,9 +60,7 @@ private:
     return mv;
   }
 
-  void move(Move mv) {
-    state[mv.row] -= mv.amount;
-  } // обработать случай когда значения больше возможных
+  void move(Move mv) { state[mv.row] -= mv.amount; }
 
   Move findOptimalMove() {
     Move mv;
@@ -85,7 +90,13 @@ public:
   Player play() {
     while (!gameEnded()) {
       printState();
-      move(getMove());
+      try {
+        move(getMove());
+      } catch (const std::exception &e) {
+        std::cerr << e.what() << '\n';
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      }
     }
     return awaitingPlayer;
   }
@@ -96,10 +107,10 @@ int main(int argc, char const *argv[]) {
   Player winner{game.play()};
   switch (winner) {
   case Player::User:
-    std::cout << "Победил игрок";
+    std::cout << "Победил игрок.";
     break;
   case Player::Bot:
-    std::cout << "Победил компьютер";
+    std::cout << "Победил компьютер.";
     break;
   }
   return 0;
