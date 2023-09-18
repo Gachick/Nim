@@ -41,6 +41,7 @@ private:
     case Player::User:
       std::cout << "Введите ход вида \"строка кол-во\": ";
       std::cin >> mv.row >> mv.amount;
+      --mv.amount;
       break;
     case Player::Bot:
       std::cout << "Ход компьютера: ";
@@ -53,7 +54,7 @@ private:
   }
 
   void move(Move mv) {
-    state[mv.row - 1] -= mv.amount;
+    state[mv.row] -= mv.amount;
   } // обработать случай когда значения больше возможных
 
   Move findOptimalMove() {
@@ -68,7 +69,7 @@ private:
         potentialMove[j] = 0;
         int newValue{calculateNimSum(potentialMove)};
         if (newValue < state[j])
-          return Move{j + 1, state[j] - newValue};
+          return Move{j, state[j] - newValue};
       }
     }
   }
