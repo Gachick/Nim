@@ -29,8 +29,9 @@ private:
 
   void printState() {
     std::cout << "\n";
-    for (int i : state) {
-      for (int j{0}; j < i; j++) {
+    for (int i{0}; i < state.size(); ++i) {
+      std::cout << i + 1 << ") ";
+      for (int j{0}; j < state[i]; j++) {
         std::cout << '#';
       }
       std::cout << "\n";
