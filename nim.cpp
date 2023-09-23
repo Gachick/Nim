@@ -27,10 +27,19 @@ private:
   Player currentPlayer{Player::User};
   Player awaitingPlayer{Player::Bot};
 
+  void printIntroduction() {
+    std::cout
+        << "<<Ним>>\nПравила игры:\n- На столе распологается 12 фишек.\n- "
+           "Игроки по очереди забирают одну или несколько фишек из любого "
+           "ряда.\n- Не разрешается за один ход брать фишки из нескольких "
+           "рядов.\n- Выигрывает тот, кто возьмёт последнюю фишку (фишки).\n";
+  }
+
   void printState() {
     std::cout << "\n";
-    for (int i : state) {
-      for (int j{0}; j < i; j++) {
+    for (int i{0}; i < state.size(); ++i) {
+      std::cout << i + 1 << ") ";
+      for (int j{0}; j < state[i]; j++) {
         std::cout << '#';
       }
       std::cout << "\n";
@@ -89,6 +98,7 @@ public:
       : currentPlayer{startingPlayer} {};
 
   Player play() {
+    printIntroduction();
     while (!gameEnded()) {
       printState();
       try {
