@@ -47,36 +47,36 @@ private:
   }
 
   Move getMove() {
-    Move mv{};
+    Move move{};
     switch (currentPlayer) {
     case Player::User:
       std::cout << "Введите ход вида \"строка кол-во\": ";
-      std::cin >> mv.row >> mv.amount;
+      std::cin >> move.row >> move.amount;
       if (std::cin.fail())
         throw std::runtime_error{"Недействительные входные данные."};
-      --mv.row;
-      if (mv.row >= state.size() || mv.amount > state[mv.row] || mv.row < 0 ||
-          mv.amount < 1)
+      --move.row;
+      if (move.row >= state.size() || move.amount > state[move.row] ||
+          move.row < 0 || move.amount < 1)
         throw std::runtime_error{"Неверное значение ряда или количества."};
       break;
     case Player::Bot:
       std::cout << "Ход компьютера: ";
-      mv = findOptimalMove();
-      std::cout << mv.row + 1 << " " << mv.amount << "\n";
+      move = findOptimalMove();
+      std::cout << move.row + 1 << " " << move.amount << "\n";
       break;
     }
     std::swap(currentPlayer, awaitingPlayer);
-    return mv;
+    return move;
   }
 
-  void move(Move mv) { state[mv.row] -= mv.amount; }
+  void makeMove(Move move) { state[move.row] -= move.amount; }
 
   Move findOptimalMove() {
-    Move mv;
+    Move optimalMove;
     if (calculateNimSum(state) == 0) {
       for (int j{0}; j < state.size(); ++j) {
         if (state[j] != 0)
-          mv = {j, 1};
+          optimalMove = {j, 1};
       }
     } else {
       for (int j{0}; j < state.size(); ++j) {
@@ -84,10 +84,10 @@ private:
         potentialMove[j] = 0;
         int newValue{calculateNimSum(potentialMove)};
         if (newValue < state[j])
-          mv = {j, state[j] - newValue};
+          optimalMove = {j, state[j] - newValue};
       }
     }
-    return mv;
+    return optimalMove;
   }
 
   bool gameEnded() { return std::reduce(state.begin(), state.end()) == 0; }
@@ -102,7 +102,7 @@ public:
     while (!gameEnded()) {
       printState();
       try {
-        move(getMove());
+        makeMove(getMove());
       } catch (const std::exception &e) {
         std::cerr << e.what() << '\n';
         std::cin.clear();
